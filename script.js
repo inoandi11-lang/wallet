@@ -304,26 +304,20 @@ function renderBalances(animate = false) {
   const baxterPoolTotal = $("#baxterPoolTotal");
   const baxterPoolDelta = $("#baxterPoolDelta");
   const baxterPoolPulse = $("#baxterPoolPulse");
-  if (baxterPoolTotal) {
-    const pool = state.trading + state.income;
-    const prevPool = prevTrading + prevIncome;
-    const delta = pool - prevPool;
-    baxterPoolTotal.textContent = `${fmt(pool)} ${TON_SYMBOL}`;
-    if (baxterPoolDelta) {
-      baxterPoolDelta.textContent = `${delta >= 0 ? "+" : "−"}${fmt(Math.abs(delta))} ${TON_SYMBOL}`;
-      baxterPoolDelta.classList.toggle("is-down", delta < 0);
-    }
-    if (baxterPoolPulse) {
-      const bars = Array.from(baxterPoolPulse.children);
-      const recent = state.trades.slice(0, bars.length);
-      bars.forEach((bar, i) => {
-        const trade = recent[i];
-        const strength = trade ? Math.min(1, Math.abs(trade.pnl) / 80) : 0.22;
-        const jitter = ((Date.now() / 240) + i) % 1;
-        const height = Math.max(18, Math.min(100, (strength * 70 + jitter * 22)));
-        bar.style.height = `${height}%`;
-      });
-    }
+  if (baxterPoolTotal && baxterPoolDelta) {
+    baxterPoolDelta.textContent = "+0.00 TON";
+    baxterPoolDelta.classList.remove("is-down");
+  }
+  if (baxterPoolPulse) {
+    const bars = Array.from(baxterPoolPulse.children);
+    const recent = state.trades.slice(0, bars.length);
+    bars.forEach((bar, i) => {
+      const trade = recent[i];
+      const strength = trade ? Math.min(1, Math.abs(trade.pnl) / 80) : 0.22;
+      const jitter = ((Date.now() / 240) + i) % 1;
+      const height = Math.max(18, Math.min(100, (strength * 70 + jitter * 22)));
+      bar.style.height = `${height}%`;
+    });
   }
 
   updateBotPowerRate();
