@@ -2409,11 +2409,12 @@ a:focus-visible {
   width: 100%;
   min-height: 32px;
   padding-inline: 6px;
+  --botpower-track-edge: calc(10% + 4.8px);
 }
 
 .botpower__timeline-line {
   position: absolute;
-  inset-inline: 0;
+  inset-inline: var(--botpower-track-edge);
   top: 50%;
   height: 2px;
   transform: translateY(-50%);
@@ -4930,9 +4931,7 @@ body.page-detail .app {
     width: calc(100% + 24px);
     margin-inline: -12px;
     padding-inline: 12px;
-  }
-  .botpower__timeline-line {
-    inset-inline: 0;
+    --botpower-track-edge: calc(10% + 9.6px);
   }
   .botpower__timeline-dot {
     width: 11px;

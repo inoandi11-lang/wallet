@@ -181,7 +181,8 @@ function updateBotPowerRate() {
     const syncLine = () => {
       const lineRect = lineEl.getBoundingClientRect();
       const dotRect = activeDot.getBoundingClientRect();
-      const fillWidth = Math.max(0, (dotRect.left + dotRect.width + 14) - lineRect.left);
+      const activeDotCenter = dotRect.left + dotRect.width / 2;
+      const fillWidth = Math.max(0, activeDotCenter - lineRect.left);
       lineEl.style.setProperty("--botpower-fill-width", `${fillWidth}px`);
     };
     requestAnimationFrame(syncLine);
