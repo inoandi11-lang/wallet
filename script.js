@@ -305,7 +305,7 @@ function renderBalances(animate = false) {
   const baxterPoolDelta = $("#baxterPoolDelta");
   const baxterPoolPulse = $("#baxterPoolPulse");
   if (baxterPoolTotal && baxterPoolDelta) {
-    baxterPoolDelta.textContent = "+0.00 TON";
+    baxterPoolDelta.textContent = `+${fmt(state.income, 4)} ${TON_SYMBOL}`;
     baxterPoolDelta.classList.remove("is-down");
   }
   if (baxterPoolPulse) {
