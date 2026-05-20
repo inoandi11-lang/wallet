@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Meridian AI — Crypto Trading Bot</title>
+  <link rel="stylesheet" href="style.css?v=20260515-bonus-modal-nav" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="app">
+    <!-- ============ TOP BAR ============ -->
+    <div class="header-shell">
+      <header class="topbar">
+        <div class="user">
+          <button class="user__menu user__menu--btn" id="settingsBtn" type="button" aria-label="Меню">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M4 7h16" />
+              <path d="M4 12h16" />
+              <path d="M4 17h16" />
+            </svg>
+          </button>
+          <div class="user__meta">
+            <button class="btn btn--primary user__wallet" id="connectWalletBtn">
+              Підключити гаманець
+            </button>
+          </div>
+        </div>
+
+        <div class="topbar__switch">
+          <button class="topbar__help" id="botInfoBtn" type="button" aria-label="Інформація про бота">?</button>
+        </div>
+
+      </header>
+
+      <div class="bal bal--trading">
+        <div class="bal__head bal__head--trading">
+          <span class="bal__label bal__label--trading">Торговий баланс</span>
+        </div>
+        <div class="bal__amount bal__amount--trading">
+          <span class="bal__value" id="tradingValue">100,000<small>.00</small></span>
+          <span class="bal__symbol" id="tradingSymbol">TON</span>
+        </div>
+        <div class="bal__actions bal__actions--split">
+          <button class="btn btn--primary bal__btn bal__btn--primary" data-action="deposit">
+            Поповнити
+          </button>
+          <button class="btn btn--ghost bal__btn bal__btn--ghost" data-action="withdraw-trading">
+            Вивести
+          </button>
+        </div>
+      </div>
+
+      <div class="bal bal--income">
+        <div class="bal__head">
+          <span class="bal__label">ДОХІД ВІД ТОРГОВОГО БАЛАНСУ</span>
+        </div>
+        <div class="bal__amount">
+          <span class="tick" id="incomeTick"></span>
+          <span class="bal__value" id="incomeValue">28,420<small>.00</small></span>
+          <span class="bal__symbol" id="incomeSymbol">TON</span>
+        </div>
+        <div class="bal__actions bal__actions--split">
+          <button class="btn btn--ghost" data-action="reinvest">
+            Реінвест
+          </button>
+          <button class="btn btn--primary" data-action="withdraw">
+            Вивести
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero app-view" id="homeSection" data-page="overview">
+      <!-- BOT POWER -->
+      <article class="panel panel--strats" id="friendsSection">
+        <header class="panel__head">
+          <div>
+            <h2 class="panel__title">ДОХІД В ДЕНЬ</h2>
+          </div>
+          <div class="botpower__rate botpower__rate--head">
+            <strong class="botpower__rate-value" id="botpowerRate">1.3%</strong>
+          </div>
+        </header>
+
+        <div class="botpower" id="botpowerStack" data-stage-index="1" data-friends-current="3" data-friends-goal="5" data-balance-current="100000" data-balance-goal="150000">
+          <p class="botpower__copy" id="botpowerCopy">Запрошуйте друзів і збільшуйте баланс, щоб піднімати свій дохід на день.</p>
+
+          <div class="botpower__scale" aria-hidden="true">
+            <span>1.1%</span>
+            <span class="is-active">1.3%</span>
+            <span>1.5%</span>
+            <span>1.7%</span>
+            <span>2.0%</span>
+          </div>
+
+          <div class="botpower__timeline" aria-hidden="true">
+            <span class="botpower__timeline-line"><i></i></span>
+            <span class="botpower__timeline-dot"></span>
+            <span class="botpower__timeline-dot is-active"></span>
+            <span class="botpower__timeline-dot"></span>
+            <span class="botpower__timeline-dot"></span>
+            <span class="botpower__timeline-dot"></span>
+          </div>
+
+          <div class="botpower__progresscols">
+            <div class="botpower__metric">
+              <span class="botpower__metric-label">Друзі</span>
+              <strong class="botpower__metric-value" id="botpowerFriendsValue">3 / 5</strong>
+              <span class="botpower__metric-note" id="botpowerFriendsNote">Ще 2 до 1.5%</span>
+              <span class="botpower__metric-bar" aria-hidden="true"><i id="botpowerFriendsBar"></i></span>
+            </div>
+            <div class="botpower__metric">
+              <span class="botpower__metric-label">Баланс</span>
+              <strong class="botpower__metric-value" id="botpowerBalanceValue">$100K / $150K</strong>
+              <span class="botpower__metric-note" id="botpowerBalanceNote">Ще $50K до 1.5%</span>
+              <span class="botpower__metric-bar" aria-hidden="true"><i id="botpowerBalanceBar"></i></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider section-divider--wave" aria-hidden="true"></div>
+
+        <div class="income-calc" data-income-calc id="transactionsSection" data-rate="1.3" data-balance="1000">
+          <div class="income-calc__head">
+            <div>
+              <h3 class="income-calc__title">Калькулятор дохода</h3>
+            </div>
+          </div>
+
+          <div class="income-calc__rates-label">Ставка</div>
+          <div class="income-calc__rates" role="tablist" aria-label="Вибір відсотка доходу в день">
+            <button type="button" class="income-calc__rate" data-income-rate="1.1" aria-pressed="false">1.1%</button>
+            <button type="button" class="income-calc__rate is-active" data-income-rate="1.3" aria-pressed="true">1.3%</button>
+            <button type="button" class="income-calc__rate" data-income-rate="1.5" aria-pressed="false">1.5%</button>
+            <button type="button" class="income-calc__rate" data-income-rate="1.7" aria-pressed="false">1.7%</button>
+            <button type="button" class="income-calc__rate" data-income-rate="2.0" aria-pressed="false">2.0%</button>
+          </div>
+
+          <div class="income-calc__slider">
+            <div class="income-calc__slider-head">
+              <span>Баланс</span>
+              <strong id="incomeCalcBalanceLabel">100,000 TON</strong>
+            </div>
+            <input
+              class="income-calc__range"
+              id="incomeCalcBalance"
+              type="range"
+              min="1"
+              max="1000"
+              step="1"
+              value="1000"
+              aria-label="Баланс для розрахунку доходу"
+            />
+          </div>
+
+          <div class="income-calc__results" aria-live="polite">
+            <div class="income-calc__result">
+              <span>День</span>
+              <strong><span id="incomeCalcDay">1,300.00</span><small> TON</small></strong>
+            </div>
+            <div class="income-calc__result">
+              <span>Тиждень</span>
+              <strong><span id="incomeCalcWeek">9,100.00</span><small> TON</small></strong>
+            </div>
+            <div class="income-calc__result">
+              <span>Місяць</span>
+              <strong><span id="incomeCalcMonth">39,000.00</span><small> TON</small></strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider section-divider--wave" aria-hidden="true"></div>
+
+        <div class="baxter-card" id="baxterTradesCard" aria-live="polite">
+          <div class="baxter-card__head">
+            <h3 class="baxter-card__title">Бакстер торгує</h3>
+            <span class="baxter-card__pool-delta" id="baxterPoolDelta">+0.00 TON</span>
+          </div>
+          <div class="baxter-card__poolline">
+            <div class="baxter-card__pool-indicator">
+              <div class="baxter-card__pool-top">
+                <div class="baxter-card__pool-kicker">Індикатор загального пулу</div>
+              </div>
+              <strong class="baxter-card__pool-value" id="baxterPoolTotal">128,420.00 TON</strong>
+              <div class="baxter-card__pool-pulse" id="baxterPoolPulse" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+            </div>
+          </div>
+          <div class="baxter-card__tape">
+            <div class="baxter-card__thead" aria-hidden="true">
+              <span>Пара</span>
+              <span>Сторона</span>
+              <span>Ціна</span>
+              <span>P&amp;L</span>
+            </div>
+            <ul class="baxter-card__tx" id="baxterTradesList"></ul>
+          </div>
+        </div>
+
+        <div class="section-divider section-divider--wave" aria-hidden="true"></div>
+      </article>
+
+      <div class="hero__right">
+        <div class="kpi">
+          <span class="kpi__label">Капітал проєкту</span>
+          <span class="kpi__value" id="kpiPnl">128,420.00<span class="ton-inline"><svg class="ton-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.8 8.9 12 20.8l7.2-11.9A2.5 2.5 0 0 0 17 5H7a2.5 2.5 0 0 0-2.2 3.9Z" /><path d="M12 17.8V6.2" /></svg></span></span>
+          <span class="kpi__bar"><i style="width:84%; background:var(--green-d)"></i></span>
+        </div>
+        <div class="kpi">
+          <span class="kpi__label">Активних учасників</span>
+          <span class="kpi__value" id="kpiTrades">162</span>
+          <span class="kpi__bar"><i style="width:68%"></i></span>
+        </div>
+        <div class="kpi">
+          <span class="kpi__label">Днів у роботі</span>
+          <span class="kpi__value">417</span>
+          <span class="kpi__bar"><i style="width:72%; background:var(--blue)"></i></span>
+        </div>
+        <div class="kpi">
+          <span class="kpi__label">Партнерів бірж</span>
+          <span class="kpi__value">3</span>
+          <span class="kpi__bar"><i style="width:80%; background:var(--orange)"></i></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="friends-page app-view" id="myFriendsPage" data-page="friends" hidden>
+      <div class="friends-hero">
+        <div class="friends-hero__content">
+          <h1 class="friends-hero__title">Мої друзі</h1>
+          <p class="friends-hero__copy">Запрошуйте друзів і отримуйте <span class="friends-hero__badge">10%</span> від кожного їхнього депозиту на торговий баланс.</p>
+        </div>
+        <div class="friends-hero__stats" aria-label="Реферальний бонус">
+          <div class="friends-hero__stat">
+            <span>Їх депозити</span>
+            <strong>18,7k TON</strong>
+          </div>
+          <div class="friends-hero__stat">
+            <span>Ваш дохід</span>
+            <strong>1,9k TON</strong>
+          </div>
+        </div>
+      </div>
+
+      <section class="friends-list-card" aria-labelledby="friendsListTitle">
+        <div class="referral-link">
+          <span class="referral-link__value" id="referralLink">https://t.me/meridian_ai_bot?start=ref_48291</span>
+          <button class="referral-link__copy-icon" id="copyReferralBtn" type="button" aria-label="Копіювати посилання">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H8a2 2 0 0 0-2 2v10" /><rect x="8" y="6" width="13" height="16" rx="2" ry="2" /></svg>
+          </button>
+        </div>
+        <button class="btn btn--primary referral-link__invite" type="button">Пригласить друга</button>
+        <div class="friends-list-card__head">
+          <h2 class="friends-list-card__title" id="friendsListTitle">Список друзів</h2>
+          <span class="friends-list-card__badge">5</span>
+        </div>
+        <ul class="friends-list">
+          <li class="friend-row">
+            <span class="friend-row__avatar">AS</span>
+            <span class="friend-row__main">
+              <strong>Alex Stone</strong>
+              <small>Депозит 4,200 TON · активний</small>
+            </span>
+            <span class="friend-row__earn">+420 TON</span>
+          </li>
+          <li class="friend-row">
+            <span class="friend-row__avatar">MK</span>
+            <span class="friend-row__main">
+              <strong>Maks Koval</strong>
+              <small>Депозит 6,500 TON · VIP</small>
+            </span>
+            <span class="friend-row__earn">+650 TON</span>
+          </li>
+          <li class="friend-row">
+            <span class="friend-row__avatar">IV</span>
+            <span class="friend-row__main">
+              <strong>Irina Vega</strong>
+              <small>Депозит 3,000 TON · активна</small>
+            </span>
+            <span class="friend-row__earn">+300 TON</span>
+          </li>
+          <li class="friend-row">
+            <span class="friend-row__avatar">DN</span>
+            <span class="friend-row__main">
+              <strong>Dmytro Nova</strong>
+              <small>Депозит 1,800 TON · новий</small>
+            </span>
+            <span class="friend-row__earn">+180 TON</span>
+          </li>
+          <li class="friend-row">
+            <span class="friend-row__avatar">OL</span>
+            <span class="friend-row__main">
+              <strong>Oleh Lumen</strong>
+              <small>Депозит 3,200 TON · активний</small>
+            </span>
+            <span class="friend-row__earn">+320 TON</span>
+          </li>
+        </ul>
+      </section>
+    </section>
+
+    <section class="history-page app-view" id="historyPage" data-page="history" hidden>
+      <div class="history-hero">
+        <div class="history-hero__content">
+          <h1 class="history-hero__title">Історія</h1>
+          <p class="history-hero__copy">Усі депозити, виводи, реінвестиції та торгові нарахування в одному чистому списку.</p>
+        </div>
+        <div class="history-hero__stats" aria-label="Підсумок історії">
+          <div class="history-hero__stat">
+            <span>Поповнення</span>
+            <strong>12,4k TON</strong>
+          </div>
+          <div class="history-hero__stat">
+            <span>Виведено</span>
+            <strong>6,3k TON</strong>
+          </div>
+        </div>
+      </div>
+
+      <section class="history-card" aria-labelledby="historyListTitle">
+        <div class="history-toolbar" aria-label="Фільтри історії">
+          <button class="history-filter is-active" type="button" data-history-filter="all" aria-pressed="true">Усі</button>
+          <button class="history-filter" type="button" data-history-filter="deposit" aria-pressed="false">Депозити</button>
+          <button class="history-filter" type="button" data-history-filter="withdraw" aria-pressed="false">Виводи</button>
+        </div>
+
+        <ul class="history-list">
+          <li class="history-row" data-history-type="income">
+            <span class="history-row__icon history-row__icon--income" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 19V5" /><path d="m6 11 6-6 6 6" /><path d="M5 19h14" /></svg>
+            </span>
+            <span class="history-row__main">
+              <strong>Дохід від торгівлі</strong>
+              <small>Автоматичне нарахування · 15:22</small>
+            </span>
+            <span class="history-row__meta">
+              <strong class="history-row__amount is-plus">+184.20 TON</strong>
+              <small>Зараховано</small>
+            </span>
+          </li>
+          <li class="history-row" data-history-type="deposit">
+            <span class="history-row__icon history-row__icon--deposit" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></svg>
+            </span>
+            <span class="history-row__main">
+              <strong>Поповнення балансу</strong>
+              <small>TON Wallet · 12:06</small>
+            </span>
+            <span class="history-row__meta">
+              <strong class="history-row__amount is-plus">+2,000 TON</strong>
+              <small>Підтверджено</small>
+            </span>
+          </li>
+          <li class="history-row" data-history-type="withdraw">
+            <span class="history-row__icon history-row__icon--withdraw" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 21V9" /><path d="m7 14 5-5 5 5" /><path d="M5 3h14" /></svg>
+            </span>
+            <span class="history-row__main">
+              <strong>Вивід доходу</strong>
+              <small>Особистий гаманець · 09:40</small>
+            </span>
+            <span class="history-row__meta">
+              <strong class="history-row__amount is-minus">-650 TON</strong>
+              <small>Виконано</small>
+            </span>
+          </li>
+          <li class="history-row" data-history-type="income">
+            <span class="history-row__icon history-row__icon--income" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 19V5" /><path d="m6 11 6-6 6 6" /><path d="M5 19h14" /></svg>
+            </span>
+            <span class="history-row__main">
+              <strong>Дохід від торгівлі</strong>
+              <small>Пул Baxter · 21:18</small>
+            </span>
+            <span class="history-row__meta">
+              <strong class="history-row__amount is-plus">+316.70 TON</strong>
+              <small>Зараховано</small>
+            </span>
+          </li>
+          <li class="history-row" data-history-type="reinvest">
+            <span class="history-row__icon history-row__icon--reinvest" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M17 2v5h-5" /><path d="M7 22v-5h5" /><path d="M18.8 9A7 7 0 0 0 7.4 5.6L6 7" /><path d="M5.2 15a7 7 0 0 0 11.4 3.4L18 17" /></svg>
+            </span>
+            <span class="history-row__main">
+              <strong>Реінвест прибутку</strong>
+              <small>Дохід → торговий баланс · 16:44</small>
+            </span>
+            <span class="history-row__meta">
+              <strong class="history-row__amount">1,100 TON</strong>
+              <small>Перенесено</small>
+            </span>
+          </li>
+          <li class="history-row" data-history-type="deposit">
+            <span class="history-row__icon history-row__icon--deposit" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></svg>
+            </span>
+            <span class="history-row__main">
+              <strong>Поповнення балансу</strong>
+              <small>TON Wallet · 10:11</small>
+            </span>
+            <span class="history-row__meta">
+              <strong class="history-row__amount is-plus">+4,500 TON</strong>
+              <small>Підтверджено</small>
+            </span>
+          </li>
+          <li class="history-row" data-history-type="withdraw">
+            <span class="history-row__icon history-row__icon--withdraw" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 21V9" /><path d="m7 14 5-5 5 5" /><path d="M5 3h14" /></svg>
+            </span>
+            <span class="history-row__main">
+              <strong>Вивід з торгового</strong>
+              <small>Особистий гаманець · Пн, 18:32</small>
+            </span>
+            <span class="history-row__meta">
+              <strong class="history-row__amount is-minus">-1,850 TON</strong>
+              <small>Виконано</small>
+            </span>
+          </li>
+          <li class="history-row" data-history-type="income">
+            <span class="history-row__icon history-row__icon--income" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 19V5" /><path d="m6 11 6-6 6 6" /><path d="M5 19h14" /></svg>
+            </span>
+            <span class="history-row__main">
+              <strong>Дохід від торгівлі</strong>
+              <small>Пул Baxter · Пн, 14:03</small>
+            </span>
+            <span class="history-row__meta">
+              <strong class="history-row__amount is-plus">+423.90 TON</strong>
+              <small>Зараховано</small>
+            </span>
+          </li>
+          <li class="history-row" data-history-type="deposit">
+            <span class="history-row__icon history-row__icon--deposit" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></svg>
+            </span>
+            <span class="history-row__main">
+              <strong>Поповнення балансу</strong>
+              <small>TON Wallet · Нд, 11:27</small>
+            </span>
+            <span class="history-row__meta">
+              <strong class="history-row__amount is-plus">+5,900 TON</strong>
+              <small>Підтверджено</small>
+            </span>
+          </li>
+        </ul>
+      </section>
+    </section>
+
+    <section class="ambassador-page app-view" id="ambassadorPage" data-page="ambassador" hidden>
+      <div class="ambassador-hero">
+        <div class="ambassador-hero__content">
+          <h1 class="ambassador-hero__title">Амбасадор</h1>
+          <p class="ambassador-hero__copy">Зареєструйте Telegram-канал, отримайте персональний ID і приводьте аудиторію в Meridian AI.</p>
+        </div>
+        <div class="ambassador-hero__stats" aria-label="Переваги амбасадора">
+          <div class="ambassador-hero__stat">
+            <span>Бонус</span>
+            <strong>до 18%</strong>
+          </div>
+          <div class="ambassador-hero__stat">
+            <span>Виплати</span>
+            <strong>щотижня</strong>
+          </div>
+        </div>
+      </div>
+
+      <section class="ambassador-benefits" aria-label="Переваги програми">
+        <article class="ambassador-benefit">
+          <span class="ambassador-benefit__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3v18" /><path d="M17 8H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" /></svg>
+          </span>
+          <span class="ambassador-benefit__label">Комісія</span>
+          <strong class="ambassador-benefit__value">за кожний депозит</strong>
+        </article>
+        <article class="ambassador-benefit">
+          <span class="ambassador-benefit__icon ambassador-benefit__icon--blue" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 19V5" /><path d="M4 19h16" /><path d="m8 15 4-4 3 3 5-7" /></svg>
+          </span>
+          <span class="ambassador-benefit__label">Аналітика</span>
+          <strong class="ambassador-benefit__value">переходи і заявки</strong>
+        </article>
+        <article class="ambassador-benefit">
+          <span class="ambassador-benefit__icon ambassador-benefit__icon--amber" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3l2.3 4.7 5.2.8-3.8 3.7.9 5.2L12 14.9 7.4 17.4l.9-5.2-3.8-3.7 5.2-.8L12 3Z" /></svg>
+          </span>
+          <span class="ambassador-benefit__label">Статус</span>
+          <strong class="ambassador-benefit__value">ранній доступ</strong>
+        </article>
+      </section>
+
+      <section class="ambassador-card" aria-labelledby="ambassadorFormTitle">
+        <div class="ambassador-id">
+          <span class="ambassador-id__label">Ваш ID для опису каналу</span>
+          <strong class="ambassador-id__value" id="ambassadorId">MA-48291</strong>
+          <button class="ambassador-id__copy" id="copyAmbassadorIdBtn" type="button" aria-label="Копіювати ID">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H8a2 2 0 0 0-2 2v10" /><rect x="8" y="6" width="13" height="16" rx="2" ry="2" /></svg>
+          </button>
+        </div>
+
+        <div class="ambassador-card__head">
+          <h2 class="ambassador-card__title" id="ambassadorFormTitle">Заявка на реєстрацію</h2>
+          <p class="ambassador-card__note">Вставте ID у опис Telegram-каналу перед відправкою заявки. Так ми підтвердимо, що канал належить саме вам.</p>
+        </div>
+
+        <form class="ambassador-form" id="ambassadorForm">
+          <label class="ambassador-field">
+            <span class="ambassador-field__label">Telegram-канал</span>
+            <input class="ambassador-field__input" id="ambassadorChannel" type="text" inputmode="url" placeholder="@channel або https://t.me/channel" autocomplete="off" required />
+          </label>
+          <label class="ambassador-field">
+            <span class="ambassador-field__label">Опис каналу</span>
+            <textarea class="ambassador-field__input ambassador-field__input--textarea" id="ambassadorDescription" rows="4" placeholder="Тематика, аудиторія, охоплення. Додайте ID MA-48291 в опис вашого каналу." required></textarea>
+          </label>
+          <button class="btn btn--primary ambassador-form__submit" type="submit">Відправити заявку</button>
+        </form>
+      </section>
+    </section>
+
+    <footer class="foot">
+      <span>© Meridian AI · 2026</span>
+      <span id="footStatus">Підключено до Binance · Bybit · OKX</span>
+    </footer>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Нижнє меню">
+    <button class="bottom-nav__btn is-active" type="button" data-bottom-action="overview" aria-pressed="true">
+      <span class="bottom-nav__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 11l9-7 9 7" />
+          <path d="M5 10.5V20h14v-9.5" />
+          <path d="M10 20v-6h4v6" />
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Головна</span>
+    </button>
+    <button class="bottom-nav__btn" type="button" data-bottom-action="friends" aria-pressed="false">
+      <span class="bottom-nav__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 8l5-5" />
+          <path d="M14 3h6v6" />
+          <path d="M20 14v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3" />
+          <path d="M9 15 20 4" />
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Друзі</span>
+    </button>
+    <button class="bottom-nav__btn bottom-nav__btn--bonus" type="button" data-bottom-action="bonus" aria-pressed="false">
+      <span class="bottom-nav__icon bottom-nav__icon--bonus" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 12v8H4v-8" />
+          <path d="M2 7h20v5H2z" />
+          <path d="M12 22V7" />
+          <path d="M12 7H7.5a2.5 2.5 0 1 1 2.15-3.77L12 7Z" />
+          <path d="M12 7h4.5a2.5 2.5 0 1 0-2.15-3.77L12 7Z" />
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Бонус</span>
+    </button>
+    <button class="bottom-nav__btn" type="button" data-bottom-action="history" aria-pressed="false">
+      <span class="bottom-nav__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 8v5l3 2" />
+          <path d="M21 12a9 9 0 1 1-3-6.7" />
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Історія</span>
+    </button>
+    <button class="bottom-nav__btn" type="button" data-bottom-action="ambassador" aria-pressed="false">
+      <span class="bottom-nav__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l2.3 4.7 5.2.8-3.8 3.7.9 5.2L12 14.9 7.4 17.4l.9-5.2-3.8-3.7 5.2-.8L12 3Z" />
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Амбасадор</span>
+    </button>
+  </nav>
+
+  <!-- ============ MODAL ============ -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card" role="dialog" aria-modal="true">
+      <header class="modal__head">
+        <div>
+          <h3 class="modal__title" id="modalTitle">Поповнити торговий баланс</h3>
+        </div>
+        <button class="modal__close" data-close aria-label="Закрити">×</button>
+      </header>
+
+      <div class="modal__body">
+        <div class="modal__info" id="modalInfo" hidden>
+          <p class="modal__info-text">Бот працює з вашим торговим балансом 24/7, реагує на ринок і намагається збільшити капітал за рахунок автоматичних угод.</p>
+          <p class="modal__info-text">Чим більший баланс, тим більший обсяг позицій і вищий потенційний дохід. Прибуток може реінвестуватися назад у роботу бота або виводитися окремо.</p>
+          <div class="modal__tariffs">
+            <div class="modal__tariffs-title">Тарифи</div>
+            <div class="tariff-list">
+              <div class="tariff-row">
+                <span class="tariff-row__icon tariff-row__icon--starter" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 18V6" />
+                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                  </svg>
+                </span>
+                <div class="tariff-row__body">
+                  <div class="tariff-row__top">
+                    <span class="tariff-row__name">STARTER</span>
+                    <span class="tariff-row__price">$100+</span>
+                  </div>
+                </div>
+              </div>
+              <div class="tariff-row">
+                <span class="tariff-row__icon tariff-row__icon--growth" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10 9.728V16" />
+                    <path d="M14 9.728V16" />
+                    <path d="M18 20V4" />
+                    <path d="m22 11-4-4A7.5 7.5 0 0 1 6 7l-4 4" />
+                    <path d="M22 16H2" />
+                    <path d="M6 20V4" />
+                  </svg>
+                </span>
+                <div class="tariff-row__body">
+                  <div class="tariff-row__top">
+                    <span class="tariff-row__name">GROWTH</span>
+                    <span class="tariff-row__price">$1,000+</span>
+                  </div>
+                </div>
+              </div>
+              <div class="tariff-row">
+                <span class="tariff-row__icon tariff-row__icon--pro" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1" />
+                    <path d="m2.5 20 2 2 4-4" />
+                    <path d="M3 16V5a2 2 0 0 1 2-2h10.2a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2h-8" />
+                    <path d="M7 3v4a1 1 0 0 0 1 1h7" />
+                  </svg>
+                </span>
+                <div class="tariff-row__body">
+                  <div class="tariff-row__top">
+                    <span class="tariff-row__name">PRO</span>
+                    <span class="tariff-row__price">$10,000+</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal__from" id="modalFromBlock">
+          <span class="modal__from-label" id="modalFromLabel">Доступно:</span>
+          <span class="modal__from-val" id="modalFromVal">$0.00</span>
+        </div>
+
+        <label class="field">
+          <span class="field__label">Сума, USDT</span>
+          <div class="field__input">
+            <span class="field__prefix">$</span>
+            <input type="number" id="modalAmount" placeholder="0.00" step="0.01" min="0" />
+            <button class="field__max" id="modalMax" type="button" hidden>MAX</button>
+          </div>
+        </label>
+
+        <div class="quick" id="modalQuick">
+          <button data-q="0.25">25%</button>
+          <button data-q="0.5">50%</button>
+          <button data-q="0.75">75%</button>
+          <button data-q="1">100%</button>
+        </div>
+
+        <div class="modal__summary" id="modalSummary"></div>
+      </div>
+
+      <footer class="modal__foot">
+        <button class="btn btn--ghost" data-close>Скасувати</button>
+        <button class="btn btn--primary" id="modalConfirm">Підтвердити</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="modal bonus-modal" id="bonusModal" hidden>
+    <div class="modal__backdrop" data-bonus-close></div>
+    <div class="modal__card bonus-modal__card" role="dialog" aria-modal="true" aria-labelledby="bonusModalTitle">
+      <button class="modal__close bonus-modal__close" type="button" data-bonus-close aria-label="Закрити">×</button>
+      <div class="bonus-modal__hero" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M20 12v8H4v-8" />
+          <path d="M2 7h20v5H2z" />
+          <path d="M12 22V7" />
+          <path d="M12 7H7.5a2.5 2.5 0 1 1 2.15-3.77L12 7Z" />
+          <path d="M12 7h4.5a2.5 2.5 0 1 0-2.15-3.77L12 7Z" />
+        </svg>
+      </div>
+      <div class="bonus-modal__content">
+        <span class="bonus-modal__eyebrow">Промоактивація</span>
+        <h3 class="bonus-modal__title" id="bonusModalTitle">Бонус-код</h3>
+        <form class="bonus-modal__form" id="bonusCodeForm" autocomplete="off">
+          <label class="bonus-modal__field" for="bonusCodeInput">
+            <span>Введіть код</span>
+            <input
+              id="bonusCodeInput"
+              name="bonusCode"
+              type="text"
+              inputmode="text"
+              placeholder="MERIDIAN2026"
+              aria-label="Введіть бонус-код"
+            />
+          </label>
+          <button class="btn btn--primary bonus-modal__button" type="submit">Активувати</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="settingsModal" hidden>
+    <div class="modal__backdrop" data-settings-close></div>
+    <div class="modal__card modal__card--settings" role="dialog" aria-modal="true">
+      <header class="modal__head">
+        <div>
+          <h3 class="modal__title">Меню</h3>
+        </div>
+        <button class="modal__close" data-settings-close aria-label="Закрити">×</button>
+      </header>
+      <div class="modal__body">
+        <nav class="drawer-nav" aria-label="Бокове меню">
+          <button class="drawer-nav__item" type="button" data-settings-close>Огляд</button>
+          <button class="drawer-nav__item" type="button" data-settings-close>Стратегії</button>
+          <button class="drawer-nav__item" type="button" data-settings-close>Угоди</button>
+          <button class="drawer-nav__item" type="button" data-settings-close>Ринок</button>
+          <button class="drawer-nav__item" type="button" data-settings-close>Логи</button>
+        </nav>
+        <div class="drawer-divider" aria-hidden="true"></div>
+        <div class="drawer-settings">
+          <div class="drawer-settings__title">Налаштування</div>
+        <div class="settings-group">
+          <div class="settings-label">Валюта</div>
+          <div class="settings-switch" aria-label="Валюта торгового балансу">
+            <span class="trading-switch__btn trading-switch__btn--active">TON</span>
+          </div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-label">Мова</div>
+          <div class="settings-switch" role="tablist" aria-label="Мова інтерфейсу">
+            <button class="trading-switch__btn trading-switch__btn--active" data-lang="RU">RU</button>
+            <button class="trading-switch__btn" data-lang="EN">EN</button>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TOAST ============ -->
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="script.js?v=20260515-bonus-modal-nav"></script>
+</body>
+</html>
