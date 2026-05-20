@@ -179,10 +179,20 @@ function updateBotPowerRate() {
   if (balanceBarEl) balanceBarEl.style.width = `${Math.max(0, Math.min(100, (balanceCurrent / Math.max(1, balanceGoal)) * 100))}%`;
   if (timelineEl && lineEl && activeDot) {
     const syncLine = () => {
-      const lineRect = lineEl.getBoundingClientRect();
+      const dots = $$(".botpower__timeline-dot", timelineEl);
+      const firstDot = dots[0];
+      const lastDot = dots[dots.length - 1];
+      if (!firstDot || !lastDot) return;
+      const timelineRect = timelineEl.getBoundingClientRect();
+      const firstDotRect = firstDot.getBoundingClientRect();
+      const lastDotRect = lastDot.getBoundingClientRect();
       const dotRect = activeDot.getBoundingClientRect();
+      const firstDotCenter = firstDotRect.left + firstDotRect.width / 2;
+      const lastDotCenter = lastDotRect.left + lastDotRect.width / 2;
       const activeDotCenter = dotRect.left + dotRect.width / 2;
-      const fillWidth = Math.max(0, activeDotCenter - lineRect.left);
+      lineEl.style.left = `${Math.max(0, firstDotCenter - timelineRect.left)}px`;
+      lineEl.style.right = `${Math.max(0, timelineRect.right - lastDotCenter)}px`;
+      const fillWidth = Math.max(0, activeDotCenter - firstDotCenter);
       lineEl.style.setProperty("--botpower-fill-width", `${fillWidth}px`);
     };
     requestAnimationFrame(syncLine);
